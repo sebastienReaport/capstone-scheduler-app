@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+<!-- Insert Head Here -->
+{% block head %}
+<script src="{{ url_for('static', filename='javascript/login.js')}}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css')}}">
+<title>Scheduler: Login</title>
+{% endblock %}
+
+<!-- Insert Body Here -->
+{% block body %}
+
+<div class="header">
+    <h1 class="title">Welcome to Scheduler</h1>
+    <h1 id="day" class="day">Monday 07/22/2022</h1>
+    <h1 id="time" class="time">0:30:17</h1>
+</div>
+<div class="actionBar">
+    <div class="selectUser">
+        <h2>Select User!</h2>
+        <form name = "selectUser" action="http://localhost:5000/calendar" method = "POST" onsubmit="return validateSelectUserForm()">
+            <label for="login">Whose calendar do you want to access?</label>
+            <br><br>
+            <select name="username" id="login">
+                {% for users in listOfUsers %}
+                <option value={{users}}>{{users}}</option>
+                {% endfor %}
+            </select>
+            <p><input type = "submit" value = "Select User"/></p>
+        </form>
+    </div>
+
+    <div class="newUser">
+        <h2>Or, you can create a new user!</h2>
+        {% if error %}
+            <label for="deleteUser" class="error">{{error}}</label>
+        {% else %}
+            <label for="deleteUser">Enter new username!</label>
+        {% endif %}
+        <br>
+        <form name = "newUserForm" action="http://localhost:5000/" method = "POST" onsubmit="return validateNameForm()" required>
+            <p>Username: <input type="text" name="newUser" id="newUser"></p>
+            <p><input type = "submit" value = "Create User"/></p>
+        </form>
+    </div>
+
+    <div class="deleteUser">
+        <h2>You can also delete a user!</h2>
+        <form action="http://localhost:5000/" method = "POST">
+            <label for="deleteUser">Which user do you want to delete?</label>
+            <br><br>
+            <select name="deleteUser" id="deleteUser">
+                {% for users in listOfUsers %}
+                <option value={{users}}>{{users}}</option>
+                {% endfor %}
+            </select>
+            <p><input type = "submit" value = "Delete User" onclick="warning(event)"/></p>
+        </form>
+    </div>
+</div>
+
+<hr>
+
+<div class="center"><h1 class="tableTitle">Check Everyone's Schedule!</h1><br></div>
+<div class="center"><div class="currently">Currently Free: {% for user in currentlyFree %} {{user}}{{ ", " if not loop.last else "" }} {% endfor %}</div></div>
+<div class="center"><div class="currently">Currently Busy: {% for user in currentlyBusy %} {{user}}{{ ", " if not loop.last else "" }} {% endfor %}</div></div>
+<div class="center">
+    <table class="schedule">
+        <tr>
+            {% for header in table.columns.values %}
+                <th class="headers">{{header}}</th>
+            {% endfor %}
+        </tr>
+
+        {% for row in table.index.values %}
+            <tr>
+                {% for cell in table.loc[row].values %}
+                    {% if cell in timeSlots %}
+                    <td class="timeslots">
+                        {{cell}} 
+                    </td>
+                    {% else %}
+                    <td class="classes">
+                        {% for user in cell%}
+                            {{user}} <br>
+                        {% endfor %}  
+                    </td>
+                    {% endif %}
+                {% endfor %}  
+            </tr>
+        {% endfor %} 
+    </table>
+</div>
+{% endblock %}
